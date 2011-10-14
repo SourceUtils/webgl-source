@@ -130,80 +130,94 @@ var SourceBsp = Object.create(Object, {
         value: false
     },
     
-    shader: {
-        value: null
-    },
-    
     lockGroups: {
-        value: null
+        value: null,
+        writable: true
     },
     
     vertBuffer: {
-        value: null
+        value: null,
+        writable: true
     },
     
     indexBuffer: {
-        value: null
+        value: null,
+        writable: true
     },
     
     propVertBuffer: {
-        value: null
+        value: null,
+        writable: true
     },
     
     propIndexBuffer: {
-        value: null
+        value: null,
+        writable: true
     },
     
     skyboxVertBuffer: {
-        value: null
+        value: null,
+        writable: true
     },
     
     skyboxIndexBuffer: {
-        value: null
+        value: null,
+        writable: true
     },
     
     skyboxIndexCount: {
-        value: 0
+        value: 0,
+        writable: true
     },
     
     skyboxCubemap: {
-        value: null
+        value: null,
+        writable: true
     },
     
     staticPropDict: {
-        value: null
+        value: null,
+        writable: true
     },
     
     staticProps: {
-        value: null
+        value: null,
+        writable: true
     },
     
     faces: {
-        value: null
+        value: null,
+        writable: true
     },
     
     bspTree: {
-        value: null
+        value: null,
+        writable: true
     },
     
     lastLeaf: {
-        value: -1
+        value: -1,
+        writable: true
     },
     
     frameCount: {
-        value: -1
+        value: -1,
+        writable: true
     },
     
     complete: {
-        value: false
+        value: false,
+        writable: true
     },
     
     entities: {
-        value: null
+        value: null,
+        writable: true
     },
     
     onMaterialsComplete: {
-        value: null
+        value: null,
+        writable: true
     },
     
     load: {

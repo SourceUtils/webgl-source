@@ -114,55 +114,63 @@ var modelViewInvMat = mat3.create();
 
 var SourceModel = Object.create(Object, {
     lod: {
-        value: 1 // -1 will select the lowest level of detail available. 0 the highest
+        value: 1, // -1 will select the lowest level of detail available. 0 the highest
+        writable: true
     },
     
     vertArray: {
-        value: null
+        value: null,
+        writable: true
     },
     
     vertBuffer: {
-        value: null
+        value: null,
+        writable: true
     },
     
     indexArray: {
-        value: null
+        value: null,
+        writable: true
     },
     
     indexBuffer: {
-        value: null
+        value: null,
+        writable: true
     },
     
     bodyParts: {
-        value: null
+        value: null,
+        writable: true
     },
     
     mdlBodyParts: {
-        value: null
-    },
-    
-    vertexIndex: {
-        value: 0
+        value: null,
+        writable: true
     },
     
     textures: {
-        value: null
+        value: null,
+        writable: true
     },
     
     textureDirs: {
-        value: null
+        value: null,
+        writable: true
     },
     
     numSkinRef: {
-        value: 0
+        value: 0,
+        writable: true
     },
     
     skinTable: {
-        value: null
+        value: null,
+        writable: true
     },
     
     skin: {
-        value: 0
+        value: 0,
+        writable: true
     },
     
     /**

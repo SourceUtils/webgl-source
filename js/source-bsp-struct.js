@@ -207,7 +207,8 @@ var dtexdata_t = Struct.create(
     Struct.int32("view_height"),
     {
         faces: {
-            value: null
+            value: null,
+            writable: true
         },
         
         addFace: {
@@ -220,7 +221,8 @@ var dtexdata_t = Struct.create(
         },
         
         numvertex: {
-            value: 0
+            value: 0,
+            writable: true
         }
     }
 );
@@ -260,7 +262,8 @@ var dleaf_t = Struct.create(
     Struct.skip(2), // Pad to 4 byte boundries
     {
         props: {
-            value: null
+            value: null,
+            writable: true
         },
         
         addProp: {
@@ -273,7 +276,8 @@ var dleaf_t = Struct.create(
         },
         
         triStrips: {
-            value: null
+            value: null,
+            writable: true
         },
         
         addTriStrip: {
@@ -329,7 +333,8 @@ var StaticPropDictLump_t = Struct.create(
     Struct.string("m_Name", STATIC_PROP_NAME_LENGTH),
     {
         props: {
-            value: null
+            value: null,
+            writable: true
         },
         
         addProp: {

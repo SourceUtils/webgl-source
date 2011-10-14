@@ -29,31 +29,38 @@
 
 var SourceBspTree = Object.create(Object, {
     planes: {
-        value: null
+        value: null,
+        writable: true
     },
     
     models: {
-        value: null
+        value: null,
+        writable: true
     },
     
     nodes: {
-        value: null
+        value: null,
+        writable: true
     },
     
     leaves: {
-        value: null
+        value: null,
+        writable: true
     },
     
     leafFaces: {
-        value: null
+        value: null,
+        writable: true
     },
     
     clusterVis: {
-        value: null
+        value: null,
+        writable: true
     },
     
     numClusters: {
-        value: 0
+        value: 0,
+        writable: true
     },
 
     parse: {

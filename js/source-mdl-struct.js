@@ -103,10 +103,12 @@ var MStudioTexture_t = Struct.create(
     Struct.skip(52),
     {
         material: {
-            value: null
+            value: null,
+            writable: true
         },
         textureName: {
-            value: null
+            value: null,
+            writable: true
         },
         readTextureName: {
             value: function(buffer, offset) {
@@ -120,7 +122,8 @@ var MStudioTextureDir_t = Struct.create(
     Struct.int32("diroffset"),
     {
         textureDir: {
-            value: null
+            value: null,
+            writable: true
         },
         readTextureDir: {
             value: function(buffer, offset) {

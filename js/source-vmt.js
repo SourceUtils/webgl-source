@@ -77,23 +77,28 @@ ShaderTokenizer.prototype.prev = function() {
 
 var SourceMaterial = Object.create(Object, {
     texture: {
-        value: null
+        value: null,
+        writable: true
     },
     
     bump: {
-        value: null
+        value: null,
+        writable: true
     },
     
     translucent: {
-        value: false
+        value: false,
+        writable: true
     },
     
-    addative: {
-        value: false
+    additive: {
+        value: false,
+        writable: true
     },
     
     nocull: {
-        value: false
+        value: false,
+        writable: true
     },
     
     load: {
@@ -105,7 +110,7 @@ var SourceMaterial = Object.create(Object, {
     
     setState: {
         value: function(gl) {
-            if(this.addative) {
+            if(this.additive) {
                 gl.blendFunc(gl.ONE, gl.ONE);
             } else {
                 gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -158,9 +163,9 @@ var SourceMaterial = Object.create(Object, {
                     } break;
                     
                     case "$additive": {
-                        var addative = tokens.next();
+                        var additive = tokens.next();
                         this.translucent = true;
-                        this.addative = addative == "1";
+                        this.additive = additive == "1";
                     } break;
                     
                     case "$nocull": {
@@ -248,19 +253,23 @@ var SourceMaterial = Object.create(Object, {
 
 var SourceMaterialManager = Object.create(Object, {
     materials: {
-        value: null
+        value: null,
+        writable: true
     },
     
     materialCount: {
-        value: 0
+        value: 0,
+        writable: true
     },
     
     materialsComplete: {
-        value: 0
+        value: 0,
+        writable: true
     },
     
     onMaterialsCompleted: {
-        value: null
+        value: null,
+        writable: true
     },
     
     init: {
