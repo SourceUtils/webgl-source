@@ -358,7 +358,7 @@ var SourceModel = Object.create(Object, {
     
     _parseFixup: {
         value: function(buffer, lod, fixupOffset, fixupCount, vertexOffset, tangentOffset) {
-            var fixupView = new DataView(buffer, fixupOffset);
+            var fixupView = new jDataView(buffer, fixupOffset);
             var vertexView = new Uint8Array(buffer, vertexOffset);
             var tangentView = new Uint8Array(buffer, tangentOffset);
             
@@ -421,7 +421,7 @@ var SourceModel = Object.create(Object, {
                             mesh.stripGroups = StripGroupHeader_t.readStructs(buffer, offset + mesh.stripGroupHeaderOffset, mesh.numStripGroups, function(stripGroup, offset) {
                                 stripGroup.strips = StripHeader_t.readStructs(buffer, offset + stripGroup.stripOffset, stripGroup.numStrips);
                                 stripGroup.verts = Vertex_t.readStructs(buffer, offset + stripGroup.vertOffset, stripGroup.numVerts);
-                                stripGroup.indexArray = new DataView(buffer, offset + stripGroup.indexOffset, stripGroup.numIndices * 2);
+                                stripGroup.indexArray = new jDataView(buffer, offset + stripGroup.indexOffset, stripGroup.numIndices * 2);
                             });
                         });
                     });
