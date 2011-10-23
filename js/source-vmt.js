@@ -235,7 +235,8 @@ var SourceMaterial = Object.create(Object, {
     },
     
     _onTextureLoaded: {
-        value: null
+        value: null,
+		writable: true
     },
     
     onTextureLoaded: {
