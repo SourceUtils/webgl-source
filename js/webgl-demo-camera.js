@@ -197,7 +197,10 @@ var FlyingDemoCamera = Object.create(Object, {
     
     speed: {
         value: 100,
-        writable: true
+    },
+    
+    lookSpeed: {
+        value: 0.01,
     },
     
     _dirty: {
@@ -277,13 +280,13 @@ var FlyingDemoCamera = Object.create(Object, {
                     lastX = event.pageX;
                     lastY = event.pageY;
                     
-                    self.angles[1] += xDelta*0.025;
+                    self.angles[1] += xDelta * self.lookSpeed;
                     while (self.angles[1] < 0)
                         self.angles[1] += Math.PI*2;
                     while (self.angles[1] >= Math.PI*2)
                         self.angles[1] -= Math.PI*2;
 
-                    self.angles[0] += yDelta*0.025;
+                    self.angles[0] += yDelta * self.lookSpeed;
                     while (self.angles[0] < -Math.PI*0.5)
                         self.angles[0] = -Math.PI*0.5;
                     while (self.angles[0] > Math.PI*0.5)
