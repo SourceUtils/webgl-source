@@ -222,7 +222,7 @@ var SourceMaterial = Object.create(Object, {
                 if(raw) {
                     var image = new Image();
                     image.addEventListener("load", function() {
-                        self.texture = image;
+                        self.bump = image;
                     }, false);
                     image.src = rootUrl + "/" + material.bumpmap + ".png";
                 } else {
@@ -236,7 +236,7 @@ var SourceMaterial = Object.create(Object, {
     
     _onTextureLoaded: {
         value: null,
-		writable: true
+        writable: true
     },
     
     onTextureLoaded: {
