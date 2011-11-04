@@ -197,10 +197,12 @@ var FlyingDemoCamera = Object.create(Object, {
     
     speed: {
         value: 100,
+        writable: true
     },
     
     lookSpeed: {
         value: 0.01,
+        writable: true
     },
     
     _dirty: {
