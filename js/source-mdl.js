@@ -63,12 +63,12 @@ meshVS += " vec3 t = normalize(tangent.xyz * normalMat);\n";
 meshVS += " vec3 b = cross (n, t) * tangent.w;\n";
 
 meshVS += " vec3 vlightPos = (viewMat * vec4(lightPos, 1.0)).xyz;\n";
-meshVS += " vec3 lightDir = normalize(vlightPos - vPosition.xyz);\n";
+meshVS += " vec3 lightDir = vlightPos - vPosition.xyz;\n";
 meshVS += " tangentLightDir.x = dot(lightDir, t);\n";
 meshVS += " tangentLightDir.y = dot(lightDir, b);\n";
 meshVS += " tangentLightDir.z = dot(lightDir, n);\n";
 
-meshVS += " vec3 eyeDir = normalize(-vPosition.xyz);\n";
+meshVS += " vec3 eyeDir = -vPosition.xyz;\n";
 meshVS += " tangentEyeDir.x = dot(eyeDir, t);\n";
 meshVS += " tangentEyeDir.y = dot(eyeDir, b);\n";
 meshVS += " tangentEyeDir.z = dot(eyeDir, n);\n";

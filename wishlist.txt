@@ -1,5 +1,4 @@
 Fix skybox
-"I looked at model shader source and you have 1 really basic mistake or oversimplification. You normalize light direction and eye direction vectors in vertex shader. Normalization isn't an operation that can be factored out of fragment shader into vertex shader."
 Texture quality selector UI
 Normal mapping on brush surfaces
 Displacement surfaces! (on bsp brushes)
