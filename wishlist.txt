@@ -1,0 +1,13 @@
+Fix skybox
+"I looked at model shader source and you have 1 really basic mistake or oversimplification. You normalize light direction and eye direction vectors in vertex shader. Normalization isn't an operation that can be factored out of fragment shader into vertex shader."
+Texture quality selector UI
+Normal mapping on brush surfaces
+Displacement surfaces! (on bsp brushes)
+Water rendering
+3D skybox
+Shaders that use cubemaps
+Un-gzip and use materials (i.e. cube maps) embedded in BSP
+Skinning (could be difficult due to optimizations that assume lots of static meshes)
+Sort transparent geometry back-to-front before rendering
+Draw skybox after opaque, before transparent
+Mouse lock once API is available?
