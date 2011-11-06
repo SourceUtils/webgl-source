@@ -476,9 +476,9 @@ var SourceModel = Object.create(Object, {
                 var bodyPart = this.bodyParts[bodyPartId];
                 var mdlBodyPart = this.mdlBodyParts[bodyPartId];
                 
-                for(var modelId in bodyPart.models) {
-                    var model = bodyPart.models[modelId];
-                    var mdlModel = mdlBodyPart.models[modelId];
+                if(bodyPart.models.length > 0) {
+                    var model = bodyPart.models[0];
+                    var mdlModel = mdlBodyPart.models[0];
                     
                     if(typeof(lodId) !== 'undefined') {
                         var lod = model.lods[lodId];
