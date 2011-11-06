@@ -849,30 +849,31 @@ var SourceBsp = Object.create(Object, {
             
             var self = this;
             materialManager.loadMaterial(gl, "root/tf/materials/", null, "skybox/" + skyname + "up", function(material) {
-                material.onTextureLoaded = function(image) {
+                material.onTextureLoaded = function(upImage) {
                     gl.bindTexture(gl.TEXTURE_CUBE_MAP, self.skyboxCubemap);
-                    gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-                };
-            }, true);
-            materialManager.loadMaterial(gl, "root/tf/materials/", null, "skybox/" + skyname + "dn", function(material) {
-                material.onTextureLoaded = function(image) {
-                    gl.bindTexture(gl.TEXTURE_CUBE_MAP, self.skyboxCubemap);
-                    gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+                    gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, upImage);
+                    
+                    // "down" texture may be 1x1, scale it up to be the same size as the rest
+                    materialManager.loadMaterial(gl, "root/tf/materials/", null, "skybox/" + skyname + "dn", function(material) {
+                        material.onTextureLoaded = function(dnImage) {
+                            gl.bindTexture(gl.TEXTURE_CUBE_MAP, self.skyboxCubemap);
+                            var scaledImage = glUtil._scaleImage(dnImage, dnImage.height / upImage.height);
+                            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, scaledImage);
+                        };
+                    }, true);
                 };
             }, true);
             materialManager.loadMaterial(gl, "root/tf/materials/", null, "skybox/" + skyname + "rt", function(material) {
                 material.onTextureLoaded = function(image) {
                     gl.bindTexture(gl.TEXTURE_CUBE_MAP, self.skyboxCubemap);
-                    // I've arbitrarily picked how the side texture maps to the different faces, wasn't able to find documentation
 
-                    // Assume 2:1 aspect ratio side texture
-                    var croppedImageX = glUtil._cropImage(image, 0, 0, image.height, image.height);
-					var croppedImageZ = glUtil._cropImage(image, image.height, 0, image.height, image.height);
+                    // Pad out the bottom half of the side texture -- this won't be visible within the map
+                    var paddedImage = glUtil._padImage(image, image.width, image.width);
 
-                    gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, croppedImageX);
-                    gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, croppedImageX);
-                    gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, croppedImageZ);
-                    gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, croppedImageZ);
+                    gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, paddedImage);
+                    gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, paddedImage);
+                    gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, paddedImage);
+                    gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, paddedImage);
                 };
             }, true);
         }

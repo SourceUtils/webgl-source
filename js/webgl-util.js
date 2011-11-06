@@ -150,6 +150,16 @@ var glUtil = Object.create(Object, {
             return canvas;
         }
     },
+    
+    _padImage: {
+        value: function(image, w, h) {
+            var canvas = document.createElement("canvas");
+            canvas.width = w;
+            canvas.height = h;
+            canvas.getContext("2d").drawImage(image, 0, 0);
+            return canvas;
+        }
+    },
 
     _scaleImage: {
         value: function(image, factor) {
