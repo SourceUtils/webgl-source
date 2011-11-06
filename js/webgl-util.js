@@ -142,17 +142,17 @@ var glUtil = Object.create(Object, {
     },
     
     _cropImage: {
-        value: catch_errors(function(image, x, y, w, h) {
+        value: function(image, x, y, w, h) {
             var canvas = document.createElement("canvas");
             canvas.width = w;
             canvas.height = h;
             canvas.getContext("2d").drawImage(image, x, y, w, h, 0, 0, w, h);
             return canvas;
-        }, "_cropImage")
+        }
     },
 
     _scaleImage: {
-        value: /*catch_errors(*/function(image, factor) {
+        value: function(image, factor) {
             var canvas = document.createElement("canvas");
             var w = image.width / factor;
             var h = image.height / factor;
@@ -167,7 +167,7 @@ var glUtil = Object.create(Object, {
             canvas.height = h;
             canvas.getContext("2d").drawImage(image, 0, 0, w, h);
             return canvas;
-        }/*, "scaleImage")*/
+        }
     },
 
     loadTexture: {
