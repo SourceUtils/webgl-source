@@ -1,4 +1,7 @@
 Fix skybox
+	Warning: WebGL: A texture is going to be rendered as if it were black, as per the OpenGL ES 2.0.24 spec section 3.8.2, because it is a cube map texture, with a minification filter not requiring a mipmap, and is not cube complete (as defined in section 3.7.10).
+	Source File: http://localhost:9000/js/source-bsp.js
+	Line: 1266
 Texture quality selector UI
 Normal mapping on brush surfaces
 Displacement surfaces! (on bsp brushes)
