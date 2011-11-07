@@ -3,7 +3,7 @@ Normal mapping on brush surfaces
 Displacement surfaces! (on bsp brushes)
 Water rendering
 3D skybox
-Un-PKZIP and use materials (i.e. cube maps) embedded in BSP
+Embedded lightmaps: Are "patch" vmt files processed properly?
 Skinning?
 Sort transparent geometry back-to-front before rendering
 Draw skybox after opaque, before transparent
