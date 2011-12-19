@@ -51,16 +51,6 @@
                 map = Object.create(SourceBsp).load(gl, 'root/tf/maps/ctf_2fort', function(map) {
                     setCameraSpawn(map.entities.info_player_start[0]);
                 });
-                map.onMaterialsComplete = function(map) {
-                    // For onGameStart Theatrics
-                    /*var loadingText = document.getElementById("loading-text");
-                    var readyBtn = document.getElementById("ready-btn");
-                    var loadingSubtext = document.getElementById("loading-subtext");
-                    
-                    loadingText.innerHTML = "Surprise Ready!";
-                    readyBtn.style.display = "inline-block";
-                    loadingSubtext.innerHTML = "You should probably shut up and show the demo now";*/
-                };
             }
             
             function setCameraSpawn(spawnPoint) {
@@ -131,22 +121,31 @@
                     document.getElementById('fps').innerHTML = frame;
                     frame = 0;
                 }, 1000); // TODO: This is pretty clunky. Find a better way...
-                
-                // For onGameStart theatrics:
-                /*var loadingSplash = document.getElementById("loading-splash");
-                var readyBtn = document.getElementById("ready-btn");
-                
-                readyBtn.addEventListener("click", function(event) {
-                    loadingSplash.addEventListener("webkitTransitionEnd", function() {
-                        loadingSplash.style.display = "none";
-                    }, false);
-                    loadingSplash.classList.add("fade");
-                    event.preventDefault();
-                }, false);*/
+            }
+
+            function textureButtonClick(setting) {
+                glUtil.textureScaling = setting;
+                document.getElementById("texture-quality-menu").style.display = 'none';
+                main();
             }
             
-            window.addEventListener("load", main);
-        </script>
+            document.addEventListener("DOMContentLoaded", function(event) {
+                document.getElementById("lowtex-btn").addEventListener("click", function(event) {
+                    textureButtonClick(4);
+                    event.preventDefault();
+                }, false);
+
+                document.getElementById("medtex-btn").addEventListener("click", function(event) {
+                    textureButtonClick(2);
+                    event.preventDefault();
+                }, false);
+
+                document.getElementById("fulltex-btn").addEventListener("click", function(event) {
+                    textureButtonClick(1);
+                    event.preventDefault();
+                }, false);
+            }, false);
+            </script>
         
         <style type="text/css">
             body {
@@ -170,8 +169,8 @@
                 z-index: 1;
                 /* margin-top: 20px; */
             }
-            
-            #loading-splash {
+
+            #texture-quality-menu {
                 position: absolute;
                 z-index: 1;
                 bottom: 0;
@@ -182,16 +181,8 @@
                 color: white;
                 text-align: center;
                 padding-top: 5em;
-                
-                /* display: none; */
             }
-            
-            #loading-splash.fade {
-                -webkit-transition-property: opacity;
-                -webkit-transition-duration: 3s;
-                opacity: 0;
-            }
-            
+
             #fps-counter {
                 position: absolute;
                 top: 5px;
@@ -211,11 +202,12 @@
                     Getting a WebGL Implementation
                 </a>
             </canvas>
-            <!--div id="loading-splash">
-                <h2 id="loading-text">Now Preparing Surprise...</h2>
-                <button id="ready-btn" style="display: none;">Go!</button>
-                <h3 id="loading-subtext">Keep talking! Distract the audience!</h3>
-            </div-->
+            <div id="texture-quality-menu">
+                <h2>Select a texture quality</h2>
+                <button id="lowtex-btn">Low</button>
+                <button id="medtex-btn">Medium</button>
+                <button id="fulltex-btn">Full</button>
+            </div>
             <div id="fps-counter">
                 FPS: <span id="fps">0</span>
             </div>

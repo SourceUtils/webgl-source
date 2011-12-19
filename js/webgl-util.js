@@ -46,8 +46,9 @@ var debugShader = null;
 var debugMatrix = mat4.create();
 
 var glUtil = Object.create(Object, {
-    TEXTURE_SCALING: {// since I can't run TF2 itself on full quality
-        value: 4
+    textureScaling: {// since I can't run TF2 itself on full quality
+        value: 1,
+        writable: true
     },
 
     getContext: {
@@ -194,8 +195,8 @@ var glUtil = Object.create(Object, {
             var texture = gl.createTexture();
             var image = new Image();
             image.addEventListener("load", function() {
-                if (glUtil.TEXTURE_SCALING != 1) {
-                    image = glUtil._scaleImage(image, glUtil.TEXTURE_SCALING);
+                if (glUtil.textureScaling != 1) {
+                    image = glUtil._scaleImage(image, glUtil.textureScaling);
                 }
                 gl.bindTexture(gl.TEXTURE_2D, texture);
                 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
