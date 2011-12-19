@@ -167,7 +167,7 @@ var glUtil = Object.create(Object, {
             var canvas = document.createElement("canvas");
             var w = image.width / factor;
             var h = image.height / factor;
-            if (Math.min(w, h) == 0) {
+            if (Math.min(w, h) <= 32) {
                 return image;
             }
             if (Math.min(w, h) < 2) {
