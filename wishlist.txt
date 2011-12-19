@@ -1,4 +1,3 @@
-Texture quality selector UI
 Normal mapping on brush surfaces
 Displacement surfaces! (on bsp brushes)
 Water rendering
