@@ -393,3 +393,47 @@ var doverlay_t = Struct.create(
     Struct.struct("Origin", Vector),
     Struct.struct("BasisNormal", Vector)
 );
+
+var ALLOWEDVERTS_SIZE = 10;
+var MAX_DISP_CORNER_NEIGHBORS = 4;
+
+var CDispSubNeighbor = Struct.create(
+    Struct.uint16("m_iNeighbor"),
+    Struct.uint8("m_NeighborOrientation"),
+    Struct.uint8("m_Span"),
+    Struct.uint8("m_NeighborSpan"),
+    Struct.uint8("padding")
+);
+
+var CDispNeighbor = Struct.create(
+    Struct.array("m_SubNeighbors", CDispSubNeighbor, 2)
+);
+
+var CDispCornerNeighbors = Struct.create(
+    Struct.array("m_Neighbors", Struct.uint16(), MAX_DISP_CORNER_NEIGHBORS),
+    Struct.uint8("m_nNeighbors"),
+    Struct.uint8("padding")
+);
+
+var ddispinfo_t = Struct.create(
+    Struct.struct("startPosition", Vector),
+    Struct.int32("DispVertStart"),
+    Struct.int32("DispTriStart"),
+    Struct.int32("power"),
+    Struct.int32("minTess"),
+    Struct.float32("smoothingAngle"),
+    Struct.int32("contents"),
+    Struct.uint16("MapFace"),
+    Struct.uint16("padding"),
+    Struct.int32("LightmapAlphaStart"),
+    Struct.int32("LightmapSamplePositionStart"),
+    Struct.array("EdgeNeighbors", CDispNeighbor, 4),
+    Struct.array("CornerNeighbors", CDispCornerNeighbors, 4),
+    Struct.array("AllowedVerts", Struct.uint32(), ALLOWEDVERTS_SIZE)
+);
+
+var dDispVert = Struct.create(
+    Struct.struct("vec", Vector), // Direction in which vertex is displaced
+    Struct.float32("dist"), // Distance by which vertex is displaced
+    Struct.float32("alpha") // Blend between textures
+);

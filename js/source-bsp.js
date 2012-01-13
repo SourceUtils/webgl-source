@@ -263,6 +263,8 @@ var SourceBsp = Object.create(Object, {
                 texData: this._parseLump(buffer, header.lumps[LUMP_TEXDATA], dtexdata_t),
                 brushes: this._parseLump(buffer, header.lumps[LUMP_BRUSHES], dbrush_t),
                 brushSides: this._parseLump(buffer, header.lumps[LUMP_BRUSHSIDES], dbrushside_t),
+                dispInfo: this._parseLump(buffer, header.lumps[LUMP_DISPINFO], ddispinfo_t),
+                dispVerts: this._parseLump(buffer, header.lumps[LUMP_DISP_VERTS], dDispVert),
             };
             
             this.bspTree = Object.create(SourceBspTree).parse(buffer, header);
@@ -578,6 +580,70 @@ var SourceBsp = Object.create(Object, {
         }
     },
     
+    _getDispTriangleIndices: {
+        value: function(power, allowedVerts) {
+            function recurse(power, node, level, allowedVerts) {
+                var triangles = [];
+                var activeChildren = [false, false, false, false];
+                if (level < power - 1) {
+                    for (var i = 0; i < 4; i++) {
+                        var childNode;
+                        var increment = 1 << (power - level - 2);
+                        switch (i) {
+                        case 0:
+                            childNode = node + increment * ((1 << power) + 1) + increment;
+                            break;
+                        case 1:
+                            childNode = node + increment * ((1 << power) + 1) - increment;
+                            break;
+                        case 2:
+                            childNode = node - increment * ((1 << power) + 1) - increment;
+                            break;
+                        case 3:
+                            childNode = node - increment * ((1 << power) + 1) + increment;
+                            break;
+                        }
+                        activeChildren[i] = allowedVerts[childNode >> 5] & (1 << (childNode & 31));
+                        if (activeChildren[i]) {
+                            var newTriangles = recurse(power, childNode, level + 1, allowedVerts);
+                            triangles.push.apply(triangles, newTriangles);
+                        }
+                    }
+                }
+                
+                var trianglePower = power - level;
+                var triangleIncrement = 1 << (trianglePower - 1);
+                
+                var tempVertices = [];
+                for (var i = 0; i < 9; i++) {
+                    var sideVertex = node
+                        + [1,0,-1,-1,-1,0,1,1,1][i] * triangleIncrement
+                        + [-1,-1,-1,0,1,1,1,0,-1][i] * triangleIncrement * ((1 << power) + 1);
+                    var sideNode = [3,-1,2,-1,1,-1,0,-1,3][i];
+                    var isNode = (sideNode != -1) && activeChildren[sideNode];
+                    if (isNode) {
+                        if (tempVertices.length == 2) {
+                            triangles.push([tempVertices[0], tempVertices[1], node]);
+                        }
+                        tempVertices = [];
+                    } else {
+                        if (allowedVerts[sideVertex >> 5] & (1 << (sideVertex & 31))) {
+                            tempVertices.push(sideVertex);
+                            if (tempVertices.length == 2) {
+                                triangles.push([tempVertices[0], tempVertices[1], node]);
+                                tempVertices = [tempVertices[1]];
+                            }
+                        }
+                    }
+                }
+                
+                return triangles;
+            }
+
+            return recurse(power, (1 << (power - 1)) * ((1 << power) + 2), 0, allowedVerts);
+        }
+    },
+    
     _processFaces: {
         value: function(gl, bspData) {
             var vertices = [];
@@ -594,7 +660,6 @@ var SourceBsp = Object.create(Object, {
                 texInfo = bspData.texInfo[face.texinfo];
                 
                 if(texInfo.texdata == -1 ||
-                    //face.dispinfo != -1 ||
                     //face.m_NumPrims != 0 || 
                     (texInfo.flags & SURF_SKIP) || 
                     (texInfo.flags & SURF_NODRAW) || 
@@ -607,7 +672,12 @@ var SourceBsp = Object.create(Object, {
                 
                 texData = bspData.texData[texInfo.texdata];
                 texData.addFace(faceId);
-                texData.numvertex += face.numedges;
+                if (face.dispinfo == -1) {
+                    texData.numvertex += face.numedges;
+                } else {
+                    var dispInfo = bspData.dispInfo[face.dispinfo];
+                    texData.numvertex += ((1 << dispInfo.power) + 1) * ((1 << dispInfo.power) + 1);
+                }
             }
             
             // Create the verts, divided into locking groups
@@ -697,58 +767,115 @@ var SourceBsp = Object.create(Object, {
                         triPatch.translucent = true; // Flag transparent patches
                     }
                     
-                    if(face.dispinfo != -1) {
-                        triPatch.displacement = true; 
-                    }
-                    
-                    // Just... ugh :(
-                    var vertLookupTable = {};
-                    
-                    for(var i = 0; i < face.numedges; ++i) {
-                        var surfEdge = bspData.surfEdges[edgeId+i];
-                        var edge = bspData.edges[Math.abs(surfEdge)];
-                        var reverse = (surfEdge >= 0);
+                    if(face.dispinfo == -1) {
+                        // Just... ugh :(
+                        var vertLookupTable = {};
                         
-                        if(i == 0) {
-                            rootVertId = edge.v[reverse?0:1];
-                            rootPoint = this._compileGpuVertex(bspData.vertices[rootVertId], face, texInfo, texData, vertices);
-                            vertLookupTable[rootVertId] = rootPoint;
-                            lockGroup.vertexCount++;
+                        for(var i = 0; i < face.numedges; ++i) {
+                            var surfEdge = bspData.surfEdges[edgeId+i];
+                            var edge = bspData.edges[Math.abs(surfEdge)];
+                            var reverse = (surfEdge >= 0);
                             
-                            vertId = edge.v[reverse?1:0];
-                            pointB = this._compileGpuVertex(bspData.vertices[vertId], face, texInfo, texData, vertices);
-                            vertLookupTable[vertId] = pointB;
-                            lockGroup.vertexCount++;
-                            
-                        } else {
-                            vertId = edge.v[reverse?0:1];
-                            if(vertId == rootVertId) { continue; }
-                            if(vertId in vertLookupTable) {
-                                pointA = vertLookupTable[vertId];
-                            } else {
-                                pointA = this._compileGpuVertex(bspData.vertices[vertId], face, texInfo, texData, vertices);
-                                vertLookupTable[vertId] = pointA;
+                            if(i == 0) {
+                                rootVertId = edge.v[reverse?0:1];
+                                rootPoint = this._compileGpuVertex(bspData.vertices[rootVertId], face, texInfo, texData, vertices);
+                                vertLookupTable[rootVertId] = rootPoint;
                                 lockGroup.vertexCount++;
-                            }
-                            
-                            vertId = edge.v[reverse?1:0];
-                            if(vertId == rootVertId) { continue; }
-                            if(vertId in vertLookupTable) {
-                                pointB = vertLookupTable[vertId];
-                            } else {
+                                
+                                vertId = edge.v[reverse?1:0];
                                 pointB = this._compileGpuVertex(bspData.vertices[vertId], face, texInfo, texData, vertices);
                                 vertLookupTable[vertId] = pointB;
                                 lockGroup.vertexCount++;
+                                
+                            } else {
+                                vertId = edge.v[reverse?0:1];
+                                if(vertId == rootVertId) { continue; }
+                                if(vertId in vertLookupTable) {
+                                    pointA = vertLookupTable[vertId];
+                                } else {
+                                    pointA = this._compileGpuVertex(bspData.vertices[vertId], face, texInfo, texData, vertices);
+                                    vertLookupTable[vertId] = pointA;
+                                    lockGroup.vertexCount++;
+                                }
+                                
+                                vertId = edge.v[reverse?1:0];
+                                if(vertId == rootVertId) { continue; }
+                                if(vertId in vertLookupTable) {
+                                    pointB = vertLookupTable[vertId];
+                                } else {
+                                    pointB = this._compileGpuVertex(bspData.vertices[vertId], face, texInfo, texData, vertices);
+                                    vertLookupTable[vertId] = pointB;
+                                    lockGroup.vertexCount++;
+                                }
+                                
+                                indices.push(rootPoint - vertexBase);
+                                indices.push(pointA - vertexBase);
+                                indices.push(pointB - vertexBase);
+                                
+                                lockGroup.indexCount += 3;
+                                triPatch.indexCount += 3;
+                                face.indexCount += 3;
                             }
-                            
-                            indices.push(rootPoint - vertexBase);
-                            indices.push(pointA - vertexBase);
-                            indices.push(pointB - vertexBase);
-                            
-                            lockGroup.indexCount += 3;
-                            triPatch.indexCount += 3;
-                            face.indexCount += 3;
                         }
+                    } else {
+                        triPatch.displacement = true;
+                        var dispInfo = bspData.dispInfo[face.dispinfo];
+                        
+                        var quadCorners = [];
+                        var startIndex, minimum = Infinity;
+                        for (var i = 0; i < face.numedges; i++) {
+                            var surfEdge = bspData.surfEdges[edgeId + i];
+                            var edge = bspData.edges[Math.abs(surfEdge)];
+                            quadCorners[i] = bspData.vertices[edge.v[(surfEdge >= 0) ? 0 : 1]];
+                            
+                            var temp = Math.pow(quadCorners[i].x - dispInfo.startPosition.x, 2)
+                                + Math.pow(quadCorners[i].y - dispInfo.startPosition.y, 2)
+                                + Math.pow(quadCorners[i].z - dispInfo.startPosition.z, 2);
+                            if (minimum > temp) {
+                                minimum = temp;
+                                startIndex = i;
+                            }
+                        }
+                        
+                        var old = quadCorners;
+                        quadCorners = [old[(2 + startIndex) % 4], old[(3 + startIndex) % 4],
+                                       old[(0 + startIndex) % 4], old[(1 + startIndex) % 4]];
+                        
+                        var n = (1 << dispInfo.power) + 1;
+                        var gpuVertexIndexOffset = vertices.length / this.VERTEX_ELEMENTS;
+                        for (var y_idx = 0; y_idx < n; y_idx++) {
+                            for (var x_idx = 0; x_idx < n; x_idx++) {
+                                var lerp1 = {x: quadCorners[2].x + (quadCorners[1].x - quadCorners[2].x) * x_idx / (n - 1),
+                                             y: quadCorners[2].y + (quadCorners[1].y - quadCorners[2].y) * x_idx / (n - 1),
+                                             z: quadCorners[2].z + (quadCorners[1].z - quadCorners[2].z) * x_idx / (n - 1)};
+                                var lerp2 = {x: quadCorners[3].x + (quadCorners[0].x - quadCorners[3].x) * x_idx / (n - 1),
+                                             y: quadCorners[3].y + (quadCorners[0].y - quadCorners[3].y) * x_idx / (n - 1),
+                                             z: quadCorners[3].z + (quadCorners[0].z - quadCorners[3].z) * x_idx / (n - 1)};
+                                var point = {x: lerp1.x + (lerp2.x - lerp1.x) * y_idx / (n - 1.0),
+                                             y: lerp1.y + (lerp2.y - lerp1.y) * y_idx / (n - 1.0),
+                                             z: lerp1.z + (lerp2.z - lerp1.z) * y_idx / (n - 1.0)};
+                                             
+                                var dispVert = bspData.dispVerts[dispInfo.DispVertStart + y_idx * n + x_idx];
+                                var perturbed = {x: point.x + dispVert.vec.x * dispVert.dist,
+                                                 y: point.y + dispVert.vec.y * dispVert.dist,
+                                                 z: point.z + dispVert.vec.z * dispVert.dist,};
+                                this._compileGpuVertex(perturbed, face, texInfo, texData, vertices, x_idx / (n - 1), y_idx / (n - 1));
+                            }
+                        }
+                        lockGroup.vertexCount += n * n;
+                        
+                        var dispIndices = this._getDispTriangleIndices(dispInfo.power, dispInfo.AllowedVerts);
+                        
+                        for (var i = 0; i < dispIndices.length; i++)
+                        {
+                            indices.push(gpuVertexIndexOffset + dispIndices[i][0] - vertexBase);
+                            indices.push(gpuVertexIndexOffset + dispIndices[i][1] - vertexBase);
+                            indices.push(gpuVertexIndexOffset + dispIndices[i][2] - vertexBase);
+                        }
+
+                        lockGroup.indexCount += 3 * dispIndices.length;
+                        triPatch.indexCount += 3 * dispIndices.length;
+                        face.indexCount += 3 * dispIndices.length;
                     }
                 }
                 
@@ -937,7 +1064,7 @@ var SourceBsp = Object.create(Object, {
     },
     
     _compileGpuVertex: {
-        value: function(pos, face, texInfo, texData, vertices) {
+        value: function(pos, face, texInfo, texData, vertices, disp_u, disp_v) {
             var tu = texInfo.textureVecsTexelsPerWorldUnits[0]; 
             var tv = texInfo.textureVecsTexelsPerWorldUnits[1];
             
@@ -955,15 +1082,21 @@ var SourceBsp = Object.create(Object, {
             vertices.push(pos.z);
             
             // Texture Coord calculation
-            var vtu = (tu.x * pos.x + tu.y * pos.y + tu.z * pos.z + tu.offset) / texData.width; 
+            var vtu = (tu.x * pos.x + tu.y * pos.y + tu.z * pos.z + tu.offset) / texData.width;
             var vtv = (tv.x * pos.x + tv.y * pos.y + tv.z * pos.z + tv.offset) / texData.height;
             
             vertices.push(vtu);
             vertices.push(vtv);
             
             // Lightmap Coord Calculation
-            var vlu = (lu.x * pos.x + lu.y * pos.y + lu.z * pos.z + lu.offset - lm[0]) / (ls[0] + 1); 
-            var vlv = (lv.x * pos.x + lv.y * pos.y + lv.z * pos.z + lv.offset - lm[1]) / (ls[1] + 1);
+            var vlu, vlv;
+            if (arguments.length >= 7) {
+                vlu = disp_u;
+                vlv = disp_v;
+            } else {
+                vlu = (lu.x * pos.x + lu.y * pos.y + lu.z * pos.z + lu.offset - lm[0]) / (ls[0] + 1);
+                vlv = (lv.x * pos.x + lv.y * pos.y + lv.z * pos.z + lv.offset - lm[1]) / (ls[1] + 1);
+            }
             
             // Compensate for packed textures
             vlu = (vlu * face.lightmapScaleX) + face.lightmapOffsetX;
