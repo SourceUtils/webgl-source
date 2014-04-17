@@ -46,6 +46,11 @@ var debugShader = null;
 var debugMatrix = mat4.create();
 
 var glUtil = Object.create(Object, {
+    textureScaling: {// since I can't run TF2 itself on full quality
+        value: 1,
+        writable: true
+    },
+
     getContext: {
         value: function(canvas) {
             var context;
@@ -137,6 +142,45 @@ var glUtil = Object.create(Object, {
         }
     },
     
+    _cropImage: {
+        value: function(image, x, y, w, h) {
+            var canvas = document.createElement("canvas");
+            canvas.width = w;
+            canvas.height = h;
+            canvas.getContext("2d").drawImage(image, x, y, w, h, 0, 0, w, h);
+            return canvas;
+        }
+    },
+    
+    _padImage: {
+        value: function(image, w, h) {
+            var canvas = document.createElement("canvas");
+            canvas.width = w;
+            canvas.height = h;
+            canvas.getContext("2d").drawImage(image, 0, 0);
+            return canvas;
+        }
+    },
+
+    _scaleImage: {
+        value: function(image, factor) {
+            var canvas = document.createElement("canvas");
+            var w = image.width / factor;
+            var h = image.height / factor;
+            if (Math.min(w, h) <= 32) {
+                return image;
+            }
+            if (Math.min(w, h) < 2) {
+                w /= Math.min(w, h);
+                h /= Math.min(w, h);
+            }
+            canvas.width = w;
+            canvas.height = h;
+            canvas.getContext("2d").drawImage(image, 0, 0, w, h);
+            return canvas;
+        }
+    },
+
     loadTexture: {
         value: function(gl, src, callback) {
             if(!this.textures) { this.textures = {}; }
@@ -151,6 +195,9 @@ var glUtil = Object.create(Object, {
             var texture = gl.createTexture();
             var image = new Image();
             image.addEventListener("load", function() {
+                if (glUtil.textureScaling != 1) {
+                    image = glUtil._scaleImage(image, glUtil.textureScaling);
+                }
                 gl.bindTexture(gl.TEXTURE_2D, texture);
                 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);

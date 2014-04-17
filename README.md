@@ -13,7 +13,10 @@ contain any. To run the demo you will need to extract the files from the GCF fil
 copy of Team Fortress 2. You can see some details on the extraction process 
 [here](http://developer.valvesoftware.com/wiki/GCFScape). Also, you will need to convert all VTF
 files (textures) to PNGs. [VTFEdit](http://nemesis.thewavelength.net/index.php?c=178#p178) can
-do the conversion as a batch.
+do the conversion as a batch. Extract the extra lightmaps from the BSP file with BSPZIP from the
+Source SDK, and convert the resulting VTF files. The materials directory from inside the BSP
+file should be placed just under the root directory, and merged with the directory structure
+extracted from the GCFs.
 
 Related Links
 -------------

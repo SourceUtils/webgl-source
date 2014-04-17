@@ -63,12 +63,12 @@ meshVS += " vec3 t = normalize(tangent.xyz * normalMat);\n";
 meshVS += " vec3 b = cross (n, t) * tangent.w;\n";
 
 meshVS += " vec3 vlightPos = (viewMat * vec4(lightPos, 1.0)).xyz;\n";
-meshVS += " vec3 lightDir = normalize(vlightPos - vPosition.xyz);\n";
+meshVS += " vec3 lightDir = vlightPos - vPosition.xyz;\n";
 meshVS += " tangentLightDir.x = dot(lightDir, t);\n";
 meshVS += " tangentLightDir.y = dot(lightDir, b);\n";
 meshVS += " tangentLightDir.z = dot(lightDir, n);\n";
 
-meshVS += " vec3 eyeDir = normalize(-vPosition.xyz);\n";
+meshVS += " vec3 eyeDir = -vPosition.xyz;\n";
 meshVS += " tangentEyeDir.x = dot(eyeDir, t);\n";
 meshVS += " tangentEyeDir.y = dot(eyeDir, b);\n";
 meshVS += " tangentEyeDir.z = dot(eyeDir, n);\n";
@@ -114,55 +114,63 @@ var modelViewInvMat = mat3.create();
 
 var SourceModel = Object.create(Object, {
     lod: {
-        value: 1 // -1 will select the lowest level of detail available. 0 the highest
+        value: 1, // -1 will select the lowest level of detail available. 0 the highest
+        writable: true
     },
     
     vertArray: {
-        value: null
+        value: null,
+        writable: true
     },
     
     vertBuffer: {
-        value: null
+        value: null,
+        writable: true
     },
     
     indexArray: {
-        value: null
+        value: null,
+        writable: true
     },
     
     indexBuffer: {
-        value: null
+        value: null,
+        writable: true
     },
     
     bodyParts: {
-        value: null
+        value: null,
+        writable: true
     },
     
     mdlBodyParts: {
-        value: null
-    },
-    
-    vertexIndex: {
-        value: 0
+        value: null,
+        writable: true
     },
     
     textures: {
-        value: null
+        value: null,
+        writable: true
     },
     
     textureDirs: {
-        value: null
+        value: null,
+        writable: true
     },
     
     numSkinRef: {
-        value: 0
+        value: 0,
+        writable: true
     },
     
     skinTable: {
-        value: null
+        value: null,
+        writable: true
     },
     
     skin: {
-        value: 0
+        value: 0,
+        writable: true
     },
     
     /**
@@ -350,7 +358,7 @@ var SourceModel = Object.create(Object, {
     
     _parseFixup: {
         value: function(buffer, lod, fixupOffset, fixupCount, vertexOffset, tangentOffset) {
-            var fixupView = new DataView(buffer, fixupOffset);
+            var fixupView = new jDataView(buffer, fixupOffset);
             var vertexView = new Uint8Array(buffer, vertexOffset);
             var tangentView = new Uint8Array(buffer, tangentOffset);
             
@@ -413,7 +421,7 @@ var SourceModel = Object.create(Object, {
                             mesh.stripGroups = StripGroupHeader_t.readStructs(buffer, offset + mesh.stripGroupHeaderOffset, mesh.numStripGroups, function(stripGroup, offset) {
                                 stripGroup.strips = StripHeader_t.readStructs(buffer, offset + stripGroup.stripOffset, stripGroup.numStrips);
                                 stripGroup.verts = Vertex_t.readStructs(buffer, offset + stripGroup.vertOffset, stripGroup.numVerts);
-                                stripGroup.indexArray = new DataView(buffer, offset + stripGroup.indexOffset, stripGroup.numIndices * 2);
+                                stripGroup.indexArray = new jDataView(buffer, offset + stripGroup.indexOffset, stripGroup.numIndices * 2);
                             });
                         });
                     });
@@ -468,9 +476,9 @@ var SourceModel = Object.create(Object, {
                 var bodyPart = this.bodyParts[bodyPartId];
                 var mdlBodyPart = this.mdlBodyParts[bodyPartId];
                 
-                for(var modelId in bodyPart.models) {
-                    var model = bodyPart.models[modelId];
-                    var mdlModel = mdlBodyPart.models[modelId];
+                if(bodyPart.models.length > 0) {
+                    var model = bodyPart.models[0];
+                    var mdlModel = mdlBodyPart.models[0];
                     
                     if(typeof(lodId) !== 'undefined') {
                         var lod = model.lods[lodId];

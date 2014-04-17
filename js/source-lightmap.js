@@ -33,12 +33,14 @@ var LIGHTMAP_SIZE = 512;
 var SourceLightmap = Object.create(Object, {
     // WebGL texture
     texture: {
-        value: null
+        value: null,
+        writable: true
     },
     
     // Used to calculate where new texture allocations should take place
     rectTree: {
-        value: null
+        value: null,
+        writable: true
     },
     
     init: {

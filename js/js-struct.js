@@ -216,8 +216,8 @@ var Struct = Object.create(Object, {
             // This new struct will be assigned a unique name so that instances can be easily constructed later.
             // It is not recommended that you use these names for anything outside this class, as they are not
             // intended to be stable from run to run.
-            Object.defineProperty(struct, "struct_type_id", { value: "struct_id_" + nextStructId, enumerable: false, configurable: false, writeable: false });
-            Object.defineProperty(this, struct.struct_type_id, { value: struct, enumerable: false, configurable: false, writeable: false });
+            Object.defineProperty(struct, "struct_type_id", { value: "struct_id_" + nextStructId, enumerable: false, configurable: false, writable: false });
+            Object.defineProperty(this, struct.struct_type_id, { value: struct, enumerable: false, configurable: false, writable: false });
             nextStructId += 1;
             
             // Build the code to read a single struct, calculate byte lengths, and define struct properties
@@ -226,7 +226,7 @@ var Struct = Object.create(Object, {
                 type = arguments[i];
                 if(!type.structProperty) { continue; }
                 if(type.name) {
-                    Object.defineProperty(struct, type.name, { value: type.defaultValue, enumerable: true, configurable: true, writeable: true });
+                    Object.defineProperty(struct, type.name, { value: type.defaultValue, enumerable: true, configurable: true, writable: true });
                     readCode += "st." + type.name + " = " + type.readCode + "\n";
                 }
                 readCode += "o += " + type.byteLength + ";\n";
@@ -236,7 +236,7 @@ var Struct = Object.create(Object, {
             
             // Build the code to read an array of this struct type
             var parseScript = "var a = new Array(count);\n var s;\n";
-            parseScript += "var v = new DataView(arrayBuffer, offset);\n"; // TODO: I should be able to specify a length here (count * this.byteLength), but it consistently gives me an INDEX_SIZE_ERR. Wonder why?
+            parseScript += "var v = new jDataView(arrayBuffer, offset);\n"; // TODO: I should be able to specify a length here (count * this.byteLength), but it consistently gives me an INDEX_SIZE_ERR. Wonder why?
             parseScript += "var o = 0, so = 0;\n";
             parseScript += "for(var i = 0; i < count; ++i) {\n";
             parseScript += "    so = o;\n";
@@ -247,11 +247,11 @@ var Struct = Object.create(Object, {
             parseScript += "}\n";
             parseScript += "return a;\n";
             
-            Object.defineProperty(struct, "byteLength", { value: byteLength, enumerable: true, configurable: true, writeable: true });
-            Object.defineProperty(struct, "readCode", { value: readCode, enumerable: true, configurable: true, writeable: true });
+            Object.defineProperty(struct, "byteLength", { value: byteLength, enumerable: true, configurable: true, writable: true });
+            Object.defineProperty(struct, "readCode", { value: readCode, enumerable: true, configurable: true, writable: true });
             
             var parseFunc = new Function("arrayBuffer", "offset", "count", "callback", parseScript);
-            Object.defineProperty(struct, "readStructs", { value: parseFunc, configurable: true, writeable: true });
+            Object.defineProperty(struct, "readStructs", { value: parseFunc, configurable: true, writable: true });
             
             return struct;
         }
@@ -307,7 +307,7 @@ var Struct = Object.create(Object, {
     readInt8Array: {
         value: function(buffer, offset, elements) {
             var array = new Int8Array(elements);
-            var v = new DataView(buffer, offset);
+            var v = new jDataView(buffer, offset);
             for(var i = 0; i < elements; ++i) {
                 array[i] = v.getInt8(i, true);
             }
@@ -324,7 +324,7 @@ var Struct = Object.create(Object, {
     readUint8Array: {
         value: function(buffer, offset, elements) {
             var array = new Uint8Array(elements);
-            var v = new DataView(buffer, offset);
+            var v = new jDataView(buffer, offset);
             for(var i = 0; i < elements; ++i) {
                 array[i] = v.getUint8(i, true);
             }
@@ -341,7 +341,7 @@ var Struct = Object.create(Object, {
     readInt16Array: {
         value: function(buffer, offset, elements) {
             var array = new Int16Array(elements);
-            var v = new DataView(buffer, offset);
+            var v = new jDataView(buffer, offset);
             for(var i = 0; i < elements; ++i) {
                 array[i] = v.getInt16(i*2, true);
             }
@@ -358,7 +358,7 @@ var Struct = Object.create(Object, {
     readUint16Array: {
         value: function(buffer, offset, elements) {
             var array = new Uint16Array(elements);
-            var v = new DataView(buffer, offset);
+            var v = new jDataView(buffer, offset);
             for(var i = 0; i < elements; ++i) {
                 array[i] = v.getUint16(i*2, true);
             }
@@ -375,7 +375,7 @@ var Struct = Object.create(Object, {
     readInt32Array: {
         value: function(buffer, offset, elements) {
             var array = new Int32Array(elements);
-            var v = new DataView(buffer, offset);
+            var v = new jDataView(buffer, offset);
             for(var i = 0; i < elements; ++i) {
                 array[i] = v.getInt32(i*4, true);
             }
@@ -392,7 +392,7 @@ var Struct = Object.create(Object, {
     readUint32Array: {
         value: function(buffer, offset, elements) {
             var array = new Uint32Array(elements);
-            var v = new DataView(buffer, offset);
+            var v = new jDataView(buffer, offset);
             for(var i = 0; i < elements; ++i) {
                 array[i] = v.getUint32(i*4, true);
             }
@@ -409,7 +409,7 @@ var Struct = Object.create(Object, {
     readFloat32Array: {
         value: function(buffer, offset, elements) {
             var array = new Float32Array(elements);
-            var v = new DataView(buffer, offset);
+            var v = new jDataView(buffer, offset);
             for(var i = 0; i < elements; ++i) {
                 array[i] = v.getFloat32(i*4, true);
             }
@@ -426,7 +426,7 @@ var Struct = Object.create(Object, {
     readFloat64Array: {
         value: function(buffer, offset, elements) {
             var array = new Float64Array(elements);
-            var v = new DataView(buffer, offset);
+            var v = new jDataView(buffer, offset);
             for(var i = 0; i < elements; ++i) {
                 array[i] = v.getFloat64(i*8, true);
             }
