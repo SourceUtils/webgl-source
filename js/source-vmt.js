@@ -288,7 +288,7 @@ var SourceMaterialManager = Object.create(Object, {
             
             this.materialCount++;
             
-            url = url.replace(".vmt", ""); // Strip off .vmt extension if it was provided
+            url = url.toLowerCase().replace(".vmt", ""); // Strip off .vmt extension if it was provided
             
             if(!searchDirs) {
                 searchDirs = [""];
@@ -297,7 +297,7 @@ var SourceMaterialManager = Object.create(Object, {
             var material;
             function tryDir(searchDirId) {
                 if(searchDirId >= searchDirs.length) {
-                    if(callback) { callback(null); } // Not found
+                    // if(callback) { callback(null); } // Not found
                     self._materialCompleted();
                     return; 
                 }

@@ -185,6 +185,8 @@ var glUtil = Object.create(Object, {
         value: function(gl, src, callback) {
             if(!this.textures) { this.textures = {}; }
             
+            src = src.toLowerCase().replace(".vtf", ""); // Strip off .vtf extension if it was provided
+            
             // Check to see if that URL has already been loaded
             var texture = this.textures[src];
             if(texture) { 

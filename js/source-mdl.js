@@ -185,7 +185,7 @@ var SourceModel = Object.create(Object, {
                 this.initializeShaders(gl);
             }
             
-            url = url.replace(".mdl", ""); // Strip off .mdl extension if it was provided
+            url = url.toLowerCase().replace(".mdl", ""); // Strip off .mdl extension if it was provided
             
             var self = this;
             
